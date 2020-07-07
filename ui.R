@@ -19,23 +19,7 @@ library(tidyr)
 library(leaflet)
 library(lubridate)
 
-#' @param text Character
-#' @param search Character. Will be passed to stringr::regex, with ignore_case = TRUE
-#' @return Highlighted HTML
-highlight_search <- function(text, search){
-    replacer <- function(x){
-        as.character(span(class = 'highlight-search', x))
-    }
-    if (search != ''){
-        tryCatch({
-            HTML(stringr::str_replace_all(text,
-                                          stringr::regex(search, ignore_case = TRUE),
-                                          replacer))
-        }, error = function(e) text)
-    } else {
-        return (HTML(text))
-    }
-}
+
 
 choices <- list()
 
