@@ -19,9 +19,7 @@ library(tidyr)
 library(leaflet)
 library(lubridate)
 
-
-
-choices <- list()
+source('R/objects.R')
 
 ui <- bootstrapPage(
     navbarPage(
@@ -57,16 +55,16 @@ ui <- bootstrapPage(
                         ),
                         fluidRow(
                             column(4,
-                                selectInput('real_cols',
-                                            label = 'Real',
+                                selectInput('int_cols',
+                                            label = 'Integer',
                                             choices = choices,
                                             multiple = TRUE)
                             ),
                             column(4,
-                                   selectInput('char_cols',
-                                               label = 'Char',
-                                               choices = choices,
-                                               multiple = TRUE)
+                                selectInput('dbl_cols',
+                                            label = 'Float',
+                                            choices = choices,
+                                            multiple = TRUE)
                             ),
                             column(4,
                                    selectInput('lgl_cols',
@@ -75,21 +73,39 @@ ui <- bootstrapPage(
                                                multiple = TRUE)
                             )
                         ),
+                        hr(),
                         fluidRow(
                             column(4,
-                                   selectInput('factor_cols',
-                                               label = 'Factor',
+                                   selectInput('chr_cols',
+                                               label = 'Character',
                                                choices = choices,
                                                multiple = TRUE)
                             ),
-
+                            column(4,
+                                   selectInput('fct_cols',
+                                               label = 'Factor',
+                                               choices = choices,
+                                               multiple = TRUE)
+                            )
+                        ),
+                        hr(),
+                        fluidRow(
                             column(4,
                                    selectInput('date_cols',
                                                label = 'Date',
                                                choices = choices,
                                                multiple = TRUE)
+                            ),
+                            column(4,
+                                   selectInput('date_parsing',
+                                               label = 'Date parsing instructions',
+                                               choices = names(date_parsing_options),
+                                               selected = 'none',
+                                               multiple = FALSE
+                                    )
                             )
                         ),
+                        hr(),
                         fluidRow(
                             column(4,
                                    selectInput('lat_cols',
