@@ -11,12 +11,13 @@ library(shiny)
 library(readr)
 library(tibble)
 
+source('R/objects.R')
 source('R/utils.R')
 
 # Define server logic required to draw a histogram
 server <- shinyServer(function(input, output, session) {
   
-  input_data <- eventReactive(input$csv_input, {
+  base_data <- eventReactive(input$csv_input, {
     inFile <- input$csv_input
     
     if (is.null(inFile))
@@ -26,12 +27,31 @@ server <- shinyServer(function(input, output, session) {
   })
   
   
-  observeEvent(input_data(), {
-    update_type_inputs(input_data(), session)
+  observeEvent(base_data(), {
+    update_type_inputs(base_data(), session)
   })
   
+  type_triggers <- reactive(c(input$int_cols, input$dbl_cols, input$lgl_cols,
+                              input$chr_cols, input$fct_cols, 
+                              input$date_cols, input$date_parsing,
+                              input$lat_cols, input$lon_cols))
+
+  input_data <- eventReactive(type_triggers(), {
+    o <- base_data() %>%
+          mutate(across(input$int_cols, as.integer)) %>%
+          mutate(across(input$dbl_cols, as.double)) %>%
+          mutate(across(input$chr_cols, as.character)) %>%
+          mutate(across(input$lgl_cols, as.logical)) %>%
+          mutate(across(input$fct_cols, as.factor)) %>%
+          mutate(across(input$date_cols, date_parsing_options[[input$date_parsing]]))
+        
+    o
+  })  
+  
+  
   output$contents <- renderTable({
-    input_data()
+    input_data() %>%
+      mutate(across(input$date_cols, as.character))
   })
 })
 
