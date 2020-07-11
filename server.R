@@ -10,13 +10,14 @@
 library(shiny)
 library(readr)
 library(tibble)
+library(DT)
 
 source('R/objects.R')
 source('R/utils.R')
 
-# Define server logic required to draw a histogram
 server <- shinyServer(function(input, output, session) {
-  
+ 
+  # ----- File input ----- 
   base_data <- eventReactive(input$csv_input, {
     inFile <- input$csv_input
     
@@ -26,17 +27,14 @@ server <- shinyServer(function(input, output, session) {
     read.csv(inFile$datapath, header = input$header) %>% as_tibble()
   })
   
-  
+  # ----- Populate dataset types in the UI ----- 
   observeEvent(base_data(), {
     update_type_inputs(base_data(), session)
   })
   
-  type_triggers <- reactive(c(input$int_cols, input$dbl_cols, input$lgl_cols,
-                              input$chr_cols, input$fct_cols, 
-                              input$date_cols, input$date_parsing,
-                              input$lat_cols, input$lon_cols))
-
-  input_data <- eventReactive(type_triggers(), {
+  # ----- Apply required type transformations on data ----- 
+  # Recalculate every time user presses the submit button
+  input_data <- eventReactive(input$submit, {
     o <- base_data() %>%
           mutate(across(input$int_cols, as.integer)) %>%
           mutate(across(input$dbl_cols, as.double)) %>%
@@ -44,14 +42,39 @@ server <- shinyServer(function(input, output, session) {
           mutate(across(input$lgl_cols, as.logical)) %>%
           mutate(across(input$fct_cols, as.factor)) %>%
           mutate(across(input$date_cols, date_parsing_options[[input$date_parsing]]))
-        
     o
   })  
   
+  # ----- Data Table View -----
+  output$contents <- renderDataTable({input_data()},
+                                     options = list(pageLength = 20))
+
+  # ----- Map View -----
+  output$map <- renderLeaflet({
+    leaflet() %>%
+      addProviderTiles(providers$CartoDB.Voyager) %>%
+      setView(-5, 10, 2)})
   
-  output$contents <- renderTable({
-    input_data() %>%
-      mutate(across(input$date_cols, as.character))
+  # Recalculate when input_data() changes
+  latitude <- reactive(tryCatch(
+    {input_data()[[input$lat_cols[1]]]},
+    error = function(x) NULL))
+  longitude <- reactive(tryCatch(
+    {input_data()[[input$lon_cols[1]]]},
+    error = function(x) NULL))
+
+  observeEvent(input$submit, {
+    leafletProxy('map') %>%
+      clearMarkers() %>%
+      clearMarkerClusters()
+    
+    if (!is.null(latitude()) & !is.null(longitude())){
+      leafletProxy('map') %>%
+        addMarkers(lng = longitude(),
+                   lat = latitude(),
+                   clusterOptions = markerClusterOptions())
+    } 
   })
+  
 })
 
