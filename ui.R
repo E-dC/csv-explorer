@@ -1,23 +1,10 @@
-#! /usr/bin/Rscript
-# ---------- Read in arguments, setup options ----------
-# require('docopt', quietly = TRUE)
-# "Run Shiny app for SwingPlanIt events. 
-# Use a dbname ending with .rda.
-# 
-# Usage:
-#   app.R  [<dbname>]
-# 
-# Options:
-# -h --help         Show this" -> doc
-# 
-# args <- docopt::docopt(doc) 
-
 library(shiny)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(leaflet)
 library(lubridate)
+library(DT)
 
 source('R/objects.R')
 
@@ -119,14 +106,24 @@ ui <- bootstrapPage(
                                                choices = choices,
                                                multiple = TRUE)
                             )
-                        )
+                        ),
+                        fluidRow(column(5),
+                                 column(2,
+                                        actionButton('submit',
+                                                     'Submit',
+                                                     type = "button", 
+                                                     class = "btn btn-danger")),
+                                 column(5))
                     )
                 )
             ),
             tabPanel(
                 'Data Table',
-                tableOutput("contents")
-            )
+                dataTableOutput("contents")
+            ),
+            tabPanel("Map",
+                     leafletOutput('map'))
+            # uiOutput('map_view')
         )
     )
 
