@@ -1,8 +1,5 @@
-
-
 choices <- list()
-date_parsing_options <- list(  "none" = function(x) return(x),
-                               "dmy" = dmy,
+date_parsing_functions <- list("dmy" = dmy,
                                "dmy_h" = dmy_h,
                                "dmy_hm" = dmy_hm,
                                "dmy_hms" = dmy_hms,
@@ -20,7 +17,7 @@ date_parsing_options <- list(  "none" = function(x) return(x),
                                "ymd_h" = ymd_h,
                                "ymd_hm" = ymd_hm,
                                "ymd_hms" = ymd_hms)
-
+date_parsing_options <- c("auto" = function(x) return(x), date_parsing_functions)
 
 lat_pat <- 'lat(itude)?'
 lon_pat <- '(long?(itude)?|lng)'
