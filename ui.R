@@ -1,13 +1,3 @@
-library(shiny)
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-library(leaflet)
-library(lubridate)
-library(DT)
-
-source('R/objects.R')
-
 ui <- bootstrapPage(
     navbarPage(
         "CSV Explorer",
@@ -87,7 +77,7 @@ ui <- bootstrapPage(
                                    selectInput('date_parsing',
                                                label = 'Date parsing instructions',
                                                choices = names(date_parsing_options),
-                                               selected = 'none',
+                                               selected = 'auto',
                                                multiple = FALSE
                                     )
                             )

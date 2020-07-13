@@ -1,15 +1,12 @@
-#
-# This is the server logic of a Shiny web application. You can run the
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
-
+# Load all dependencies
 library(shiny)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(leaflet)
 library(readr)
 library(tibble)
+library(lubridate)
 library(DT)
 
 source('R/objects.R')
@@ -35,13 +32,18 @@ server <- shinyServer(function(input, output, session) {
   # ----- Apply required type transformations on data ----- 
   # Recalculate every time user presses the submit button
   input_data <- eventReactive(input$submit, {
+
+    date_parser <- ifelse(input$date_parsing == 'auto',
+                          find_parser(base_data() %>% select(all_of(input$date_cols))),
+                          date_parsing_options[[input$date_parsing]])
+
     o <- base_data() %>%
           mutate(across(input$int_cols, as.integer)) %>%
           mutate(across(input$dbl_cols, as.double)) %>%
           mutate(across(input$chr_cols, as.character)) %>%
           mutate(across(input$lgl_cols, as.logical)) %>%
           mutate(across(input$fct_cols, as.factor)) %>%
-          mutate(across(input$date_cols, date_parsing_options[[input$date_parsing]]))
+          mutate(across(input$date_cols, date_parser))
     o
   })  
   
