@@ -21,3 +21,4 @@ date_parsing_options <- c("auto" = function(x) return(x), date_parsing_functions
 
 lat_pat <- 'lat(itude)?'
 lon_pat <- '(long?(itude)?|lng)'
+date_pat <- '(\\bdate\\b|date$|\\bdatetime\\b|datetime$)'

@@ -82,9 +82,13 @@ get_df_coltypes <- function(df){
   lon_cols <- df %>%
     select(matches(lon_pat, ignore.case = TRUE) & where(is.double)) %>%
     names()
-
+  date_cols <- df %>%
+    select(matches(date_pat, ignore.case = TRUE) | where(lubridate::is.Date)) %>%
+    names()
+  
   list('lat_cols' = lat_cols,
        'lon_cols' = lon_cols,
+       'date_cols' = date_cols,
        'lgl_cols' = df %>%
          select(where(is.logical)) %>%
          names(),
@@ -95,13 +99,10 @@ get_df_coltypes <- function(df){
          select(-lat_cols & -lon_cols & where(is.double)) %>%
          names(),
        'char_cols' = df %>%
-         select(where(is.character)) %>%
+         select(-date_cols & where(is.character)) %>%
          names(),
        'fct_cols' = df %>%
-         select(where(is.factor)) %>%
-         names(),
-       'date_cols' = df %>%
-         select(where(lubridate::is.Date)) %>%
+         select(-date_cols & where(is.factor)) %>%
          names()
          )
 }
