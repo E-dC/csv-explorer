@@ -1,3 +1,34 @@
+#' Attempt to find the correct date parser for a vector of character dates
+#' 
+#' @description Check 5% of all rows in a date column so as to find the correct
+#'   order for the parser (ymd, dmy, mdy, etc.). Then we can just use that instead
+#'   of a more permissive but potentially slower parser.
+#' 
+#' @param x A list or character vector of dates to analyse
+#' @return The function to use for parsing 
+find_parser <- function(x){
+  wrapper <- function(f){
+    v <- f(frac)
+    return (length(v[!is.na(v)]))
+  }
+  
+  if (! is.null(x)){
+    x <- x[!is.na(x)]
+    total <- length(x)
+    n <- ifelse(total < 50, total, round(0.05 * length(x)))
+    frac <- sample(x, n)
+
+    r <- suppressWarnings(sapply(date_parsing_functions, wrapper))
+    top <- sort(r, decreasing = TRUE)[1]
+
+    if (top > (0.5 * n)){
+      return (do.call(switch, c(names(top), date_parsing_functions)))
+    }
+  }
+  return (function (x) return (x))
+
+}
+
 type2colnames <- function(df, x, col_names = names(df)){
   valid_types <- switch(x,
                         'geo' = c('double', 'numeric'),
