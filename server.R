@@ -47,6 +47,11 @@ server <- shinyServer(function(input, output, session) {
     o
   })  
   
+  coltype_structure <- eventReactive(input_data(), {
+    list_df_coltypes(input_data())
+  })
+  
+  
   # ----- Data Table View -----
   output$contents <- renderDataTable({input_data()},
                                      options = list(pageLength = 20))
@@ -77,6 +82,28 @@ server <- shinyServer(function(input, output, session) {
                    clusterOptions = markerClusterOptions())
     } 
   })
+  
+  output$geom_ui <- renderUI({
+      switch(input$geom_type,
+             'Barplot' = barplot_ui(coltype_structure()),
+             NULL)
+  })
+
+  output$main_plot <- renderPlot({
+
+    # Ridiculously convoluted way of getting aesthetics as expressions
+    mappings <- possible_mappings %>%
+      sapply(., function(val) input[[paste0('aes_', val)]]) %>%
+      purrr::discard(is.null) %>%
+      purrr::discard(. == '') %>%
+      lapply(., as.name)
+
+      print(mappings)
+      ggplot(input_data(), mapping = do.call(aes, mappings)) +
+        geom_bar()
+    
+  })
+
   
 })
 

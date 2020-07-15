@@ -112,8 +112,24 @@ ui <- bootstrapPage(
                 dataTableOutput("contents")
             ),
             tabPanel("Map",
-                     leafletOutput('map'))
-            # uiOutput('map_view')
+                     leafletOutput('map')),
+            tabPanel("Charts",
+                     sidebarLayout(
+                         sidebarPanel(
+                             selectInput('geom_type',
+                                         'Plot type',
+                                         choices = names(geom_options),
+                                         selected = 'Barplot',
+                                         multiple = FALSE),
+                             hr(),
+                             uiOutput('geom_ui')
+                             ),
+                         mainPanel(
+                             plotOutput('main_plot')
+                             
+                         )
+                     )
+            )
         )
     )
 
