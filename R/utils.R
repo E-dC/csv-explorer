@@ -29,42 +29,6 @@ find_parser <- function(x){
 
 }
 
-type2colnames <- function(df, x, col_names = names(df)){
-  valid_types <- switch(x,
-                        'geo' = c('double', 'numeric'),
-                        'lat' = c('double', 'numeric'),
-                        'lon' = c('double', 'numeric'),
-                        'int' = c('integer'),
-                        'dbl' = c('double'),
-                        'numeric' = c('numeric', 'integer', 'double'),
-                        'char' = c('character'),
-                        'fct' = c('factor'),
-                        'lgl' = c('logical'),
-                        'date' = c('date', 'Date'),
-                        NULL = c()
-  )
-  
-  if (x %in% c('lat', 'lon')){
-    p <- ifelse(x == 'lat', 'lat(itude)?', '(long?(itude)?|lng)')
-    o <- sapply(col_names,
-                function(x) ifelse(
-                  grepl(p, x, ignore.case = TRUE) &
-                    is(df[[x]])[1] %in% valid_types,
-                  x,
-                  NA),
-                USE.NAMES = FALSE)
-  } else {
-    o <- sapply(col_names,
-                function(x) ifelse(
-                  is(df[[x]])[1] %in% valid_types,
-                  x,
-                  NA),
-                USE.NAMES = FALSE)
-  }
-  o[!is.na(o)]
-}
-
-
 #' @title Get \code{tibble}-guessed data types for each dataframe column
 #' 
 #' @description Get all of \code{df} columns' data types and put them in
@@ -98,7 +62,7 @@ get_df_coltypes <- function(df){
        'dbl_cols' = df %>%
          select(-lat_cols & -lon_cols & where(is.double)) %>%
          names(),
-       'char_cols' = df %>%
+       'chr_cols' = df %>%
          select(-date_cols & where(is.character)) %>%
          names(),
        'fct_cols' = df %>%
@@ -146,3 +110,55 @@ highlight_search <- function(text, search){
     return (HTML(text))
   }
 }
+
+list_df_coltypes <- function(df){
+  list('date_cols' = df %>%
+         select(where(is.Date)) %>%
+         names(),
+       'lgl_cols' = df %>%
+         select(where(is.logical)) %>%
+         names(),
+       'int_cols' = df %>%
+         select(where(is.integer)) %>%
+         names(),
+       'dbl_cols' = df %>%
+         select(where(is.double)) %>%
+         names(),
+       'chr_cols' = df %>%
+         select(where(is.character)) %>%
+         names(),
+       'fct_cols' = df %>%
+         select(where(is.factor)) %>%
+         names()
+  )
+}
+
+
+barplot_ui <- function(coltypes){
+  all_coltypes <- unlist(coltypes, use.names = FALSE)
+  categorical <- unlist(coltypes[grepl('(char|chr|fct|lgl|date)',
+                                       names(coltypes))],
+                        use.names = FALSE)
+  numerical <- unlist(coltypes[grepl('(int|dbl)',
+                                     names(coltypes))],
+                      use.names = FALSE)
+  
+  list(
+      selectInput('aes_x',
+                  label = 'Variable: x',
+                  choices = categorical),
+      selectInput('aes_y',
+                  label = 'Variable: y',
+                  choices = c(NULL, all_coltypes)),
+      selectInput('aes_alpha',
+                  label = 'Variable: transparency',
+                  choices = c('', numerical)),
+      selectInput('aes_fill',
+                  label = 'Variable: fill colour',
+                  choices = c('', all_coltypes)),
+      selectInput('aes_colour',
+                  label = 'Variable: outline colour',
+                  choices = c('', all_coltypes))
+  )
+}
+
