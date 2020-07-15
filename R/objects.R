@@ -19,6 +19,11 @@ date_parsing_functions <- list("dmy" = dmy,
                                "ymd_hms" = ymd_hms)
 date_parsing_options <- c("auto" = function(x) return(x), date_parsing_functions)
 
+geom_options <- c('Barplot' = geom_bar,
+                  'Histogram' = geom_histogram,
+                  'Scatterplot' = geom_point)
+possible_mappings <- c('x', 'y', 'alpha', 'fill', 'colour')
+
 lat_pat <- 'lat(itude)?'
 lon_pat <- '(long?(itude)?|lng)'
 date_pat <- '(\\bdate\\b|date$|\\bdatetime\\b|datetime$)'
