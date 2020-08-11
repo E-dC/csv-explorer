@@ -51,6 +51,11 @@ server <- shinyServer(function(input, output, session) {
     list_df_coltypes(input_data())
   })
   
+  # ----- Populate charts option in the UI ----- 
+  observeEvent(input$submit, {
+    update_mappings_inputs(input_data(), session)
+  })
+  
   
   # ----- Data Table View -----
   output$contents <- renderDataTable({input_data()},
@@ -83,27 +88,30 @@ server <- shinyServer(function(input, output, session) {
     } 
   })
   
-  output$geom_ui <- renderUI({
-      switch(input$geom_type,
-             'Barplot' = barplot_ui(coltype_structure()),
-             NULL)
-  })
-
-  output$main_plot <- renderPlot({
-
-    # Ridiculously convoluted way of getting aesthetics as expressions
-    mappings <- possible_mappings %>%
-      sapply(., function(val) input[[paste0('aes_', val)]]) %>%
+  # Get the mappings from the user when interacting with UI
+  aes_mappings <- reactive({
+    aes_mappings <- possible_mappings %>%
+      sapply(., function(val) input[[val]]) %>%
       purrr::discard(is.null) %>%
       purrr::discard(. == '') %>%
-      lapply(., as.name)
-
-      print(mappings)
-      ggplot(input_data(), mapping = do.call(aes, mappings)) +
-        geom_bar()
-    
+      purrr::discard(. == ' ') %>%
+      purrr::map(., as.name) %>%
+      purrr::set_names(., stringr::str_remove(names(.),
+                                              pattern = 'aes_'))
+    print(aes_mappings)
+    aes_mappings
   })
-
   
+  # Don't show a plot if there's an error
+  output$main_plot <- renderPlot({
+    p <- tryCatch({
+      ggplot(data = input_data()) +
+        layer(mapping = do.call(aes, aes_mappings()),
+              geom = input$geom_type,
+              stat = input$stat,
+              position = input$position)},
+      error =  function(e) {print(e) ; ggplot() + geom_blank()})
+    
+    p})
 })
 
