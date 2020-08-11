@@ -1,3 +1,16 @@
+library(shiny)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(leaflet)
+library(readr)
+library(tibble)
+library(lubridate)
+library(DT)
+
+source('R/objects.R')
+source('R/utils.R')
+
 ui <- bootstrapPage(
     navbarPage(
         "CSV Explorer",
@@ -112,26 +125,87 @@ ui <- bootstrapPage(
                 dataTableOutput("contents")
             ),
             tabPanel("Map",
-                     leafletOutput('map')),
+                     leafletOutput('map', width = '100%', height = '700px')
+            ),
             tabPanel("Charts",
-                     sidebarLayout(
-                         sidebarPanel(
+                     fluidPage(
+                        sidebarLayout(
+                            sidebarPanel(width = 2,
+                                selectInput('aes_x',
+                                            'X',
+                                            choices = choices),
+                                selectInput('aes_y',
+                                            'Y',
+                                            choices = choices),
+                                selectInput('aes_fill',
+                                            'Fill',
+                                            choices = choices),
+                                selectInput('aes_colour',
+                                            'Colour',
+                                            choices = choices),
+                                selectInput('aes_alpha',
+                                            'Transparency',
+                                            choices = choices),
+                                selectInput('aes_group',
+                                            'Group',
+                                            choices = choices),
+                                selectInput('aes_linetype',
+                                            'Line type',
+                                            choices = choices),
+                                selectInput('aes_size',
+                                            'Size',
+                                            choices = choices)
+                     ),
+                     mainPanel(width = 10,
+                         fluidRow(
+                             column(3,
                              selectInput('geom_type',
                                          'Plot type',
-                                         choices = names(geom_options),
-                                         selected = 'Barplot',
-                                         multiple = FALSE),
-                             hr(),
-                             uiOutput('geom_ui')
-                             ),
-                         mainPanel(
-                             plotOutput('main_plot')
-                             
+                                         choices = c('None' = ' ',
+                                                     'Bar' = 'bar',
+                                                     'Point' = 'point',
+                                                     'Line' = 'line'),
+                                         selected = 'None',
+                                         multiple = FALSE)),
+                             column(3,
+                             selectInput('position',
+                                         'Position',
+                                         choices = c('None' = ' ',
+                                                     'Identity' = 'identity',
+                                                     'Stack' = 'stack',
+                                                     'Dodge' = 'dodge',
+                                                     'Jitter' = 'jitter'),
+                                         selected = 'Identity',
+                                         multiple = FALSE)),
+                             column(3,
+                             selectInput('stat',
+                                         'Stat',
+                                         choices = c('None' = ' ',
+                                                     'Identity' = 'identity',
+                                                     'Count' = 'count',
+                                                     'Bin' = 'bin',
+                                                     'Unique' = 'unique'),
+                                         selected = 'None',
+                                         multiple = FALSE)),
+                             column(3,
+                             sliderInput('stat_param',
+                                         'Bins',
+                                         value = 30,
+                                         min = 1,
+                                         max = 100,
+                                         step = 1))
+                         ),
+                         fluidRow(
+                               plotOutput('main_plot', height = "600px")
                          )
                      )
+                )
             )
         )
     )
+)
+
+
 
 
 
