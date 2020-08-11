@@ -92,6 +92,32 @@ update_type_inputs <- function(df, session){
     selected = col_types)
 }
 
+#' @title Update variables drop-downs in the charts UI 
+#' 
+#' @description  When a dataframe has been type-checked from the loaded CSV
+#'   file, update the select list aesthetics mappings controls on the charts UI tab.
+#'   
+#' @param df Dataframe created from the loaded CSV file.
+#' @param session The session object passed to function given to shinyServer.
+#' @return Nothing, we only want a side effect here 
+update_mappings_inputs <- function(df, session){
+  choices <- c("No mapping" = ' ', names(df))
+  selected = "No mapping"
+  
+  input_refs <- c('aes_x', 'aes_y',
+                  'aes_fill', 'aes_colour',
+                  'aes_linetype', 'aes_size',
+                  'aes_group', 'aes_alpha')
+  
+  mapply(function(input_ref, selected) {
+    updateSelectInput(session = session,
+                      inputId = input_ref,
+                      choices = choices,
+                      selected = selected)},
+    input_ref = input_refs,
+    selected = selected)
+}
+
 
 #' @param text Character
 #' @param search Character. Will be passed to stringr::regex, with ignore_case = TRUE
@@ -132,7 +158,6 @@ list_df_coltypes <- function(df){
          names()
   )
 }
-
 
 barplot_ui <- function(coltypes){
   all_coltypes <- unlist(coltypes, use.names = FALSE)
