@@ -11,9 +11,10 @@ library(DT)
 
 source('R/objects.R')
 source('R/utils.R')
+source('R/ui_components.R')
 
 server <- shinyServer(function(input, output, session) {
- 
+
   # ----- File input ----- 
   base_data <- eventReactive(input$csv_input, {
     inFile <- input$csv_input
@@ -88,6 +89,15 @@ server <- shinyServer(function(input, output, session) {
     } 
   })
   
+  # ----- Update "Show more" button -----
+  observeEvent(input$toggle_optional_mappings, {
+    if (input$toggle_optional_mappings %% 2 != 0){
+      updateActionButton(session, 'toggle_optional_mappings', label = 'Show less')
+    } else {
+      updateActionButton(session, 'toggle_optional_mappings', label = 'Show more')
+    }
+  })
+
   # Get the mappings from the user when interacting with UI
   aes_mappings <- reactive({
     aes_mappings <- possible_mappings %>%
@@ -104,12 +114,19 @@ server <- shinyServer(function(input, output, session) {
   
   # Don't show a plot if there's an error
   output$main_plot <- renderPlot({
+    
+    params <- list(na.rm = TRUE)
+    if (input$stat == 'bin'){
+      params <- c(params, bins = input$stat_param)
+    }
+    
     p <- tryCatch({
       ggplot(data = input_data()) +
         layer(mapping = do.call(aes, aes_mappings()),
               geom = input$geom_type,
               stat = input$stat,
-              position = input$position)},
+              position = input$position,
+              params = params)},
       error =  function(e) {print(e) ; ggplot() + geom_blank()})
     
     p})
