@@ -37,8 +37,9 @@ find_parser <- function(x){
 #' @return A list where each name is the \code{inputId} of an input in the
 #'   UI, and each value is a vector of column names with the correct
 #'   characteristics.
-#'   @import magrittr
-#'   @import dplyr
+#' @import magrittr
+#' @import dplyr
+#' @import tidyr
 get_df_coltypes <- function(df){
   lat_cols <- df %>%
     select(matches(lat_pat, ignore.case = TRUE) & where(is.double)) %>%
@@ -79,6 +80,7 @@ get_df_coltypes <- function(df){
 #' @param df Dataframe created from the loaded CSV file.
 #' @param session The session object passed to function given to shinyServer.
 #' @return Nothing, we only want a side effect here 
+#' @import shiny
 update_type_inputs <- function(df, session){
   choices <- names(df)
   col_types <- get_df_coltypes(df)
@@ -100,6 +102,8 @@ update_type_inputs <- function(df, session){
 #' @param df Dataframe created from the loaded CSV file.
 #' @param session The session object passed to function given to shinyServer.
 #' @return Nothing, we only want a side effect here 
+#' @import shiny
+#' @export
 update_mappings_inputs <- function(df, session){
   choices <- c("No mapping" = ' ', names(df))
   selected = "No mapping"
@@ -137,6 +141,7 @@ highlight_search <- function(text, search){
   }
 }
 
+#' @import dplyr, tidyr, maggrittr
 list_df_coltypes <- function(df){
   list('date_cols' = df %>%
          select(where(is.Date)) %>%
@@ -159,6 +164,7 @@ list_df_coltypes <- function(df){
   )
 }
 
+#' @import shiny
 barplot_ui <- function(coltypes){
   all_coltypes <- unlist(coltypes, use.names = FALSE)
   categorical <- unlist(coltypes[grepl('(char|chr|fct|lgl|date)',

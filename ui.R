@@ -1,16 +1,5 @@
-library(shiny)
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-library(leaflet)
-library(readr)
-library(tibble)
-library(lubridate)
-library(DT)
-
-source('R/objects.R')
-source('R/utils.R')
-source('R/ui_components.R')
+library('CSVexplorer')
+library('shiny')
 
 ui <- bootstrapPage(
     navbarPage(
@@ -19,62 +8,19 @@ ui <- bootstrapPage(
         inverse = TRUE,       
         
         # ----- Data Load and datatypes UI -----
-        tabPanel(
-            "Data Load",
-            sidebarLayout(
-                sidebarPanel(
-                    fileInput('csv_input',
-                              label = 'Select a CSV file to explore',
-                              accept = c(
-                                  "text/csv",
-                                  "text/comma-separated-values,text/plain",
-                                  ".csv")
-                    ),
-                    tags$hr(),
-                    checkboxInput("header", "Header", TRUE)
-                ),
-                mainPanel(ui_datatypes)
-            )
-        ),
-            
+        dataLoadUI('data_load',
+                   tab_label = "Data Load"),
+        
         # ----- Data Table -----
-        tabPanel(
-            "Data Table",
-            dataTableOutput("contents")
-        ),
+        tableViewerUI('table_viewer',
+                      tab_label = "Data Table"), 
             
         # ----- Map -----
-        tabPanel(
-            "Map",
-            leafletOutput('map', width = '100%', height = '700px')
-        ),
-            
+        mapViewerUI('map_viewer',
+                    tab_label = "Map"),    
+        
         # ----- Chart output + UI -----
-        tabPanel(
-            "Charts",
-            fluidRow(
-                sidebarLayout(
-                    # Plot layers elements: mappings, geom, position, stat, stat parameters
-                    sidebarPanel(width = 3,
-                                 ui_current_layer,
-                    
-                                 tags$hr(),
-                            
-                                 # Eventually, way to work with multiple layers
-                                 tabsetPanel(type = 'pills',
-                                             tabPanel('Layer 1', value = 'layer_1'),
-                                             tabPanel('Add layer', value = 'add_layer'),
-                                             tabPanel('Remove current layer', value = 'remove_layer'))),
-                    mainPanel(width = 9,
-                              plotOutput('main_plot', height = "650px"))
-                )
-            )
-        )
+        plotViewerUI('plot_viewer',
+                     tab_label = "Charts")
     )
 )
-
-
-
-
-
-
